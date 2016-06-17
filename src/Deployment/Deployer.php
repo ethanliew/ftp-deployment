@@ -397,7 +397,13 @@ class Deployer
 					}
 					$err = isset($e);
 				} else {
-					$err = ($out = @file_get_contents($job)) === FALSE;
+					$ch = curl_init();
+					curl_setopt($ch, CURLOPT_URL, $job);
+					curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+					$out = curl_exec($ch);
+					if ($err = (bool) curl_errno($ch)) {
+						$out = curl_error($ch) . "\n" . $out;
+					}
 				}
 				$this->logger->log($job . ($out == NULL ? '' : ": $out")); // intentionally ==
 				if ($err) {
